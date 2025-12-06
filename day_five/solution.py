@@ -34,14 +34,30 @@ def check_id_freshness(id, ranges):
 def count_all_fresh():
   global fresh_ranges
   fresh_ranges.sort()
+  final_ranges = []
+  for span in fresh_ranges:
+    if len(final_ranges) > 0 and span[0] <= final_ranges[-1][1]:
+      final_ranges[-1][1] = max(final_ranges[-1][1], span[0], span[1])
+    else:
+      final_ranges.append(span)
+  count = 0
+  for span in final_ranges:
+    count += span[1] - span[0] + 1
+  return count
+
+def count_all_fresh_old():
+  global fresh_ranges
+  fresh_ranges.sort()
   i = 0
   final_ranges = []
   while i < len(fresh_ranges) - 1:
-    if fresh_ranges[i][1] > fresh_ranges[i+1][0]:
+    if fresh_ranges[i][1] >= fresh_ranges[i+1][0]:
+      end_range = max(fresh_ranges[i][1], fresh_ranges[i+1][1])
+
       if i+2 < len(fresh_ranges):
-        fresh_ranges = fresh_ranges[0:i] + [[fresh_ranges[i][0], fresh_ranges[i+1][1]]] + fresh_ranges[i+2:]
+        fresh_ranges = fresh_ranges[0:i] + [[fresh_ranges[i][0], end_range]] + fresh_ranges[i+2:]
       else:
-        fresh_ranges = fresh_ranges[0:i] + [[fresh_ranges[i][0], fresh_ranges[i+1][1]]]
+        fresh_ranges = fresh_ranges[0:i] + [[fresh_ranges[i][0], end_range]]
     else:
       i+=1
   count = 0
@@ -55,5 +71,7 @@ def main():
   print(count_fresh(data))
   print("Part 2:")
   print(count_all_fresh())
+  print("old")
+  print(count_all_fresh_old())
 
 main()
